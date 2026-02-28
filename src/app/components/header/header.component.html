@@ -1,0 +1,40 @@
+<header class="navbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a routerLink="/" class="navbar-brand"> <i class="fas fa-home"></i> RentNest </a>
+
+    <button class="hamburger">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="navbar-menu d-flex align-items-center">
+      <ul class="navbar-nav">
+        <li>
+          <a
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-link"
+            >Trang chủ</a
+          >
+        </li>
+        <li><a routerLink="/rooms" routerLinkActive="active" class="nav-link">Xem Phòng</a></li>
+        <li>
+          <a routerLink="/pricing" routerLinkActive="active" class="nav-link">Bảng giá Dịch vụ</a>
+        </li>
+        <li><a routerLink="/contact" routerLinkActive="active" class="nav-link">Liên hệ</a></li>
+      </ul>
+
+      <div class="nav-actions d-flex gap-2">
+        @if (!isLoggedIn) {
+          <a routerLink="/login" class="btn btn-outline btn-sm">Đăng nhập</a>
+          <a routerLink="/register" class="btn btn-primary btn-sm">Đăng ký</a>
+        } @else {
+          <span class="nav-link" style="font-weight: bold; margin-right: 10px"
+            >Xin chào, {{ username }}</span
+          >
+          <button (click)="logout()" class="btn btn-danger btn-sm">Đăng xuất</button>
+        }
+      </div>
+    </nav>
+  </div>
+</header>
