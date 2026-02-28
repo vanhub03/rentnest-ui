@@ -12,6 +12,7 @@ import { AuthService } from '../../_services/auth.service';
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
+  isMenuOpen = false;
   username = '';
   constructor(
     private storageService: StorageService,
@@ -25,7 +26,9 @@ export class HeaderComponent implements OnInit {
       this.username = user.username;
     }
   }
-
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
   logout(): void {
     this.authService.logout().subscribe({
       next: (res) => {

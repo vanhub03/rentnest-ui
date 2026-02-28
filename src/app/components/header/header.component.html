@@ -2,11 +2,11 @@
   <div class="container d-flex justify-content-between align-items-center">
     <a routerLink="/" class="navbar-brand"> <i class="fas fa-home"></i> RentNest </a>
 
-    <button class="hamburger">
+    <button class="hamburger" (click)="toggleMenu()">
       <i class="fas fa-bars"></i>
     </button>
 
-    <nav class="navbar-menu d-flex align-items-center">
+    <nav class="navbar-menu d-flex align-items-center" [class.active]="isMenuOpen">
       <ul class="navbar-nav">
         <li>
           <a
@@ -14,25 +14,54 @@
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
             class="nav-link"
+            (click)="isMenuOpen = false"
             >Trang chủ</a
           >
         </li>
-        <li><a routerLink="/rooms" routerLinkActive="active" class="nav-link">Xem Phòng</a></li>
         <li>
-          <a routerLink="/pricing" routerLinkActive="active" class="nav-link">Bảng giá Dịch vụ</a>
+          <a
+            routerLink="/rooms"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Xem Phòng</a
+          >
         </li>
-        <li><a routerLink="/contact" routerLinkActive="active" class="nav-link">Liên hệ</a></li>
+        <li>
+          <a
+            routerLink="/pricing"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Bảng giá Dịch vụ</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/contact"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Liên hệ</a
+          >
+        </li>
       </ul>
 
       <div class="nav-actions d-flex gap-2">
         @if (!isLoggedIn) {
-          <a routerLink="/login" class="btn btn-outline btn-sm">Đăng nhập</a>
-          <a routerLink="/register" class="btn btn-primary btn-sm">Đăng ký</a>
-        } @else {
-          <span class="nav-link" style="font-weight: bold; margin-right: 10px"
-            >Xin chào, {{ username }}</span
+          <a routerLink="/login" class="btn btn-outline btn-sm" (click)="isMenuOpen = false"
+            >Đăng nhập</a
           >
-          <button (click)="logout()" class="btn btn-danger btn-sm">Đăng xuất</button>
+          <a routerLink="/register" class="btn btn-primary btn-sm" (click)="isMenuOpen = false"
+            >Đăng ký</a
+          >
+        } @else {
+          <span class="nav-link" style="font-weight: bold; margin-right: 10px; cursor: default">
+            <i class="fas fa-user-circle"></i> Xin chào, {{ username }}
+          </span>
+          <button (click)="logout()" class="btn btn-danger btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+          </button>
         }
       </div>
     </nav>
