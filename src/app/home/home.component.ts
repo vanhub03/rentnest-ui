@@ -3,10 +3,11 @@ import { RoomService } from '../_services/room.service';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RoomCardComponent } from '../components/ui/room-card/room-card.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RoomCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
