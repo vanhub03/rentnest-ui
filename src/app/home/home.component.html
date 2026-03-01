@@ -20,9 +20,10 @@
             style="border: none; background-color: var(--bg-alt); padding: 0.5rem"
           >
             <option value="">Tất cả quận/huyện</option>
-            <option value="caugiay">Cầu Giấy, Hà Nội</option>
-            <option value="thanhxuan">Thanh Xuân, Hà Nội</option>
-            <option value="q1">Quận 1, TP.HCM</option>
+
+            @for (loc of availableLocations; track loc) {
+              <option [value]="loc">{{ loc }}</option>
+            }
           </select>
         </div>
         <div class="flex-1 text-left">
@@ -56,6 +57,59 @@
     </div>
   </section>
 
+  <section class="py-5" style="background-color: var(--bg-surface)">
+    <div class="container">
+      <div class="text-center mb-5 reveal">
+        <span class="badge badge-primary mb-2">Vì sao chọn RentNest?</span>
+        <h2 class="font-bold">Hệ Sinh Thái Quản Lý Toàn Diện</h2>
+      </div>
+
+      <div class="d-grid grid-cols-3 gap-4">
+        <div
+          class="card card-hover p-4 border-0 reveal-left"
+          style="background-color: var(--bg-main)"
+        >
+          <div class="feature-icon-box animate-float">
+            <i class="fas fa-search-location"></i>
+          </div>
+          <h3 class="font-semibold mb-2">Tìm Phòng Dễ Dàng</h3>
+          <p class="text-muted">
+            Bộ lọc thông minh giúp bạn tìm được căn phòng ưng ý với mức giá và vị trí tốt nhất, hình
+            ảnh thực tế xát gốc.
+          </p>
+        </div>
+
+        <div
+          class="card card-hover p-4 border-0 reveal delay-200"
+          style="background-color: var(--bg-main)"
+        >
+          <div class="feature-icon-box animate-float" style="animation-delay: 0.5s">
+            <i class="fas fa-file-signature"></i>
+          </div>
+          <h3 class="font-semibold mb-2">Hợp Đồng Điển Tử</h3>
+          <p class="text-muted">
+            Ký kết và quản lý hợp đồng thuê nhà hoàn toàn trực tuyến, pháp lý rõ ràng, minh bạch
+            thông tin hai bên.
+          </p>
+        </div>
+
+        <div
+          class="card card-hover p-4 border-0 reveal-right delay-400"
+          style="background-color: var(--bg-main)"
+        >
+          <div class="feature-icon-box animate-float" style="animation-delay: 1s">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <h3 class="font-semibold mb-2">Thanh Toán Xuyên Suốt</h3>
+          <p class="text-muted">
+            Nhận hóa đơn chi tiết hàng tháng và thanh toán thuận tiện qua quét mã QR Code, Momo,
+            ZaloPay tự động gạch nợ.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="py-5">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-4 reveal">
@@ -66,10 +120,12 @@
       </div>
 
       <div class="d-grid grid-cols-4 gap-4">
-        @for (room of latestRooms; track room.id) {
-          <app-room-card [room]="room"></app-room-card>
+        @for (roomItem of latestRooms; track roomItem.id) {
+          <app-room-card class="reveal" style="display: block" [room]="roomItem"></app-room-card>
         } @empty {
-          <div class="col-span-4 text-center py-5 text-muted">Chưa có phòng trọ nào được đăng.</div>
+          <div class="col-span-4 text-center py-5 text-muted reveal">
+            Chưa có phòng trọ nào được đăng.
+          </div>
         }
       </div>
     </div>
@@ -82,7 +138,7 @@
         Trải nghiệm hệ thống quản lý bất động sản chuyên nghiệp với tính năng chốt điện nước, xuất
         hóa đơn tự động và đánh giá người thuê uy tín.
       </p>
-      <a routerLink="/admin/dashboard" class="btn btn-secondary btn-lg animate-float"
+      <a routerLink="/landlord" class="btn btn-secondary btn-lg animate-float"
         >Dùng Thử Admin Portal</a
       >
     </div>

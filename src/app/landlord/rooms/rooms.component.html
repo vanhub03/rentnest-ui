@@ -1,0 +1,213 @@
+<div class="admin-content">
+  <div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="m-0 font-bold" style="font-size: 1.5rem">Quản lý Phòng & Giường</h2>
+  </div>
+
+  <div class="card p-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <select
+          class="form-control form-control-sm"
+          style="width: 200px"
+          [(ngModel)]="filter.hostelId"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả cơ sở</option>
+          <option value="1">Cơ sở Xuân Thủy</option>
+          <option value="2">Cơ sở Cầu Giấy</option>
+        </select>
+        <select
+          class="form-control form-control-sm"
+          style="width: 150px"
+          [(ngModel)]="filter.status"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="AVAILABLE">Phòng trống</option>
+          <option value="RENTED">Đang thuê</option>
+          <option value="SOON_AVAILABLE">Sắp trống</option>
+          <option value="MAINTENANCE">Đang sửa chữa</option>
+        </select>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Tìm tên phòng..."
+          style="width: 200px"
+          [(ngModel)]="filter.keyword"
+          (keyup.enter)="onFilterChange()"
+        />
+      </div>
+      <button class="btn btn-primary" (click)="openModal()">
+        <i class="fas fa-plus"></i> Thêm Phòng Mới
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cơ Sở</th>
+            <th>Tên Phòng</th>
+            <th>Loại Phòng</th>
+            <th>Giá Thuê</th>
+            <th>Diện tích</th>
+            <th>Trạng Thái</th>
+            <th class="text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rooms; track r.id) {
+            <tr>
+              <td>{{ r.hostelName }}</td>
+              <td class="font-medium text-primary">{{ r.roomName }}</td>
+              <td>
+                {{
+                  r.roomType === 'STUDIO'
+                    ? 'Studio'
+                    : r.roomType === 'ROOM'
+                      ? 'Phòng Trọ'
+                      : 'Căn Hộ'
+                }}
+              </td>
+              <td>{{ r.price | currency: 'VND' : '' }}đ</td>
+              <td>{{ r.area }}m²</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'badge-info': r.status === 'AVAILABLE',
+                    'badge-success': r.status === 'RENTED',
+                    'badge-warning': r.status === 'SOON_AVAILABLE',
+                    'badge-danger': r.status === 'MAINTENANCE',
+                  }"
+                >
+                  {{
+                    r.status === 'AVAILABLE'
+                      ? 'Trống'
+                      : r.status === 'RENTED'
+                        ? 'Đang thuê'
+                        : r.status === 'SOON_AVAILABLE'
+                          ? 'Sắp trống'
+                          : 'Sửa chữa'
+                  }}
+                </span>
+              </td>
+              <td class="text-right">
+                <button class="btn btn-sm btn-outline" title="Chỉnh sửa">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-outline text-danger"
+                  style="margin-left: 0.5rem"
+                  title="Xóa"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+      <span class="text-sm text-muted">
+        Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }} (Tổng:
+        {{ totalElements }} phòng)
+      </span>
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="filter.page === 0">
+          <a class="page-link" (click)="changePage(filter.page - 1)"
+            ><i class="fas fa-chevron-left"></i
+          ></a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ filter.page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0">
+          <a class="page-link" (click)="changePage(filter.page + 1)"
+            ><i class="fas fa-chevron-right"></i
+          ></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.active]="isModalOpen">
+  <div class="modal" style="max-width: 700px">
+    <div class="modal-header">
+      <h3 class="modal-title">Thêm Phòng Mới</h3>
+      <button type="button" class="modal-close" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="needs-validation" (ngSubmit)="onSubmitRoom()">
+        <div class="d-grid grid-cols-2 gap-4">
+          <div class="col-span-2 form-group" style="grid-column: span 2">
+            <label class="form-label">Cơ sở / Tòa nhà <span class="text-danger">*</span></label>
+            <select class="form-control" name="hostelId" [(ngModel)]="newRoom.hostelId" required>
+              <option value="">-- Chọn cơ sở --</option>
+              <option value="1">Cơ Sở Xuân Thủy</option>
+              <option value="2">Cơ Sở Cầu Giấy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tên/Mã phòng <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              name="roomName"
+              [(ngModel)]="newRoom.roomName"
+              placeholder="VD: P.101"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Loại phòng</label>
+            <select class="form-control" name="roomType" [(ngModel)]="newRoom.roomType" required>
+              <option value="STUDIO">Studio</option>
+              <option value="ROOM">Phòng Trọ Thường</option>
+              <option value="APARTMENT">Căn hộ Dịch vụ</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"
+              >Giá thuê (VNĐ/tháng) <span class="text-danger">*</span></label
+            >
+            <input
+              type="number"
+              class="form-control"
+              name="price"
+              [(ngModel)]="newRoom.price"
+              placeholder="VD: 4500000"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diện tích (m²)</label>
+            <input
+              type="number"
+              class="form-control"
+              name="area"
+              [(ngModel)]="newRoom.area"
+              required
+            />
+          </div>
+          <div class="col-span-2 form-group" style="grid-column: span 2">
+            <label class="form-label">Mô tả chi tiết</label>
+            <textarea
+              class="form-control"
+              rows="3"
+              name="description"
+              [(ngModel)]="newRoom.description"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer p-0 border-0 mt-4">
+          <button type="button" class="btn btn-outline" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Phòng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
