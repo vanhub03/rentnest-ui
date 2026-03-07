@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'], // Em nhớ copy CSS của trang login vào file SCSS này nhé
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   form: any = {
     username: '',
     password: '',
@@ -22,13 +22,19 @@ export class LoginComponent {
 
   // Biến cờ để kiểm soát việc ẩn/hiện mật khẩu
   showPassword = false;
-
+  isLoggedIn = false;
   constructor(
     private authService: AuthService,
     private storageService: StorageService,
     private router: Router,
     private toastr: ToastrService,
   ) {}
+  ngOnInit(): void {
+    this.isLoggedIn = this.storageService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.router.navigate(['/home']); // Về trang chủ
+    }
+  }
 
   // Hàm chuyển đổi trạng thái ẩn/hiện mật khẩu (Thay cho JS thuần)
   togglePassword(): void {

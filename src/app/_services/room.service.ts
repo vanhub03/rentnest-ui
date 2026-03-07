@@ -20,4 +20,8 @@ export class RoomService {
   getLandlordRooms(params: any): Observable<any> {
     return this.http.get(enviroment.apiUrl + '/landlord/rooms', { params });
   }
+
+  createHostel(data: FormData): Observable<any> {
+    return this.http.post(enviroment.apiUrl + '/landlord/hostels', data);
+  }
 }

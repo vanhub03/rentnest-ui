@@ -20,7 +20,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
-  { path: '**', redirectTo: 'login' },
   {
     path: 'landlord',
     component: LandlordLayoutComponent, // Sử dụng Landlord Layout
@@ -32,4 +31,5 @@ export const routes: Routes = [
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
     ],
   },
+  { path: '**', redirectTo: 'login' },
 ];
