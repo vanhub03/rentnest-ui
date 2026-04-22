@@ -3,18 +3,13 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "21f70732-f4b8-41f3-a710-a8a7ba926df4"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "rentnest-ui": {
+    "rentnestFE": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss",
-          "type": "component"
-        }
-      },
+      "schematics": {},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -24,7 +19,6 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
@@ -61,10 +55,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "rentnest-ui:build:production"
+              "buildTarget": "rentnestFE:build:production"
             },
             "development": {
-              "buildTarget": "rentnest-ui:build:development"
+              "buildTarget": "rentnestFE:build:development"
             }
           },
           "defaultConfiguration": "development"

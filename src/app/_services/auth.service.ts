@@ -1,5 +1,5 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { enviroment } from '../../env';
 import { Observable } from 'rxjs';
 
@@ -14,6 +14,7 @@ export class AuthService {
   register(userData: any): Observable<any> {
     return this.http.post(enviroment.apiUrl + '/auth/register', userData);
   }
+
   logout(): Observable<any> {
     return this.http.post(enviroment.apiUrl + '/auth/logout', {});
   }

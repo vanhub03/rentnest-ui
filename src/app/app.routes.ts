@@ -1,34 +1,38 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
+import { RegisterComponent } from './register/register.component';
 import { LandlordLayoutComponent } from './layouts/landlord-layout/landlord-layout.component';
-import { LandlordRoomsComponent } from './landlord/rooms/rooms.component';
-import { landlordGuard } from './_helpers/landlord.guard';
+import { LandLordRoomsComponent } from './landlord/rooms/rooms.component';
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { LandlordTenantsComponent } from './landlord/tenants/tenants.component';
+import { AddTenantComponent } from './landlord/add-tenants/add-tenant.component';
+import { PublicRoomsComponent } from './rooms/rooms.component';
+import { RoomDetailComponent } from './room-detail/room-detail.component';
+import { RentalRequests } from './landlord/rental-requests/rental-requests.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'register', component: RegisterComponent },
+  {
+    path: 'landlord',
+    component: LandlordLayoutComponent,
+    children: [
+      { path: 'rooms', component: LandLordRoomsComponent },
+      { path: 'tenants', component: LandlordTenantsComponent },
+      { path: 'add-tenant', component: AddTenantComponent },
+      { path: 'rental-requests', component: RentalRequests },
+      { path: '', redirectTo: 'rooms', pathMatch: 'full' },
+    ],
+  },
   {
     path: '',
     component: MainLayoutComponent,
     children: [
-      //tam thoi
       { path: 'home', component: HomeComponent },
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
-    ],
-  },
-  {
-    path: 'landlord',
-    component: LandlordLayoutComponent, // Sử dụng Landlord Layout
-    canActivate: [landlordGuard],
-    children: [
-      { path: 'rooms', component: LandlordRoomsComponent },
-      // Sau này tạo thêm trang Hợp đồng, Hóa đơn thì bỏ vào đây...
-
-      { path: '', redirectTo: 'rooms', pathMatch: 'full' },
+      { path: 'rooms', component: PublicRoomsComponent },
+      { path: 'rooms/:id', component: RoomDetailComponent },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },
   { path: '**', redirectTo: 'login' },

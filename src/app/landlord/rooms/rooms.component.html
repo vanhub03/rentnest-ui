@@ -1,128 +1,285 @@
 <div class="admin-content">
-  <div class="mb-4 d-flex justify-content-between align-items-center">
-    <h2 class="m-0 font-bold" style="font-size: 1.5rem">Quản lý Phòng & Giường</h2>
+  <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2 class="m-0 font-bold" style="font-size: 1.5rem">Quản lý Hostel và Phòng</h2>
+      <p class="text-sm text-muted m-0">
+        Chuyển đổi nhanh giữa danh sách phòng và danh sách hostel.
+      </p>
+    </div>
+    <div class="view-toggle">
+      <button
+        type="button"
+        class="view-toggle__btn"
+        [class.is-active]="viewMode === 'rooms'"
+        (click)="setViewMode('rooms')"
+      >
+        <i class="fas fa-door-open"></i> Phòng
+      </button>
+      <button
+        type="button"
+        class="view-toggle__btn"
+        [class.is-active]="viewMode === 'hostels'"
+        (click)="setViewMode('hostels')"
+      >
+        <i class="fas fa-building"></i> Hostel
+      </button>
+    </div>
   </div>
 
-  <div class="card p-0 mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-      <div class="d-flex gap-3">
-        <select
-          class="form-control form-control-sm"
-          style="width: 200px"
-          [(ngModel)]="filter.hostelId"
-          (change)="onFilterChange()"
-        >
-          <option value="">Tất cả cơ sở</option>
-          <option value="1">Cơ sở Xuân Thủy</option>
-          <option value="2">Cơ sở Cầu Giấy</option>
-        </select>
-        <select
-          class="form-control form-control-sm"
-          style="width: 150px"
-          [(ngModel)]="filter.status"
-          (change)="onFilterChange()"
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="AVAILABLE">Phòng trống</option>
-          <option value="RENTED">Đang thuê</option>
-          <option value="MAINTENANCE">Đang sửa chữa</option>
-        </select>
+  @if (viewMode === 'rooms') {
+    <div class="card p-0 mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex gap-3 flex-wrap">
+          <select
+            class="form-control form-control-sm"
+            style="width: 200px"
+            [(ngModel)]="filter.hostelId"
+            [disabled]="hostelOptionsLoading || roomsLoading"
+            (change)="onFilterChange()"
+          >
+            <option value="">Tất cả cơ sở</option>
+            @for (hostel of hostelOptions; track hostel.id) {
+              <option [value]="hostel.id">{{ hostel.name }}</option>
+            }
+          </select>
+          <select
+            class="form-control form-control-sm"
+            style="width: 150px"
+            [(ngModel)]="filter.status"
+            [disabled]="roomsLoading"
+            (change)="onFilterChange()"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="AVAILABLE">Phòng trống</option>
+            <option value="RENTED">Đang thuê</option>
+            <option value="MAINTENANCE">Đang sửa chữa</option>
+          </select>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Tìm tên phòng..."
+            style="width: 220px"
+            [(ngModel)]="filter.keyword"
+            [disabled]="roomsLoading"
+            (keyup.enter)="onFilterChange()"
+          />
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline" (click)="openHostelModal()">
+            <i class="fas fa-building"></i> Thêm Hostel
+          </button>
+          <button class="btn btn-primary" (click)="openRoomModal()">
+            <i class="fas fa-plus"></i> Thêm Phòng
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive data-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Hostel</th>
+              <th>Tên phòng</th>
+              <th>Loại giường</th>
+              <th>Giá thuê</th>
+              <th>Diện tích</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rooms; track r.id) {
+              <tr>
+                <td>{{ r.hostel?.name || r.location || 'Chưa cập nhật' }}</td>
+                <td class="font-medium text-primary">
+                  {{ r.title || r.roomName || 'Chưa đặt tên' }}
+                </td>
+                <td>{{ r.bedType || 'Không có giường' }}</td>
+                <td>{{ r.price ?? r.basePrice | currency: 'VND' : '' }}đ</td>
+                <td>{{ r.area }}m2</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'badge-info': r.status === 'AVAILABLE',
+                      'badge-success': r.status === 'RENTED',
+                      'badge-danger': r.status === 'MAINTENANCE',
+                    }"
+                  >
+                    {{
+                      r.status === 'AVAILABLE'
+                        ? 'Trống'
+                        : r.status === 'RENTED'
+                          ? 'Đang thuê'
+                          : 'Sửa chữa'
+                    }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button class="btn btn-sm btn-outline" (click)="openEditRoomModal(r)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline text-danger"
+                    style="margin-left: 0.5rem"
+                    (click)="deleteRoom(r.id)"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu phòng.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="data-shell__overlay" *ngIf="roomsLoading">
+          <div class="loading-panel">
+            <div class="loading-panel__glow"></div>
+            <div class="loading-panel__spinner"></div>
+            <div class="loading-panel__line loading-panel__line--lg"></div>
+            <div class="loading-panel__line loading-panel__line--md"></div>
+            <div class="loading-panel__line loading-panel__line--sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+        <span class="text-sm text-muted">
+          Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }} (Tổng:
+          {{ totalElements }} phòng)
+        </span>
+        <ul class="pagination m-0">
+          <li class="page-item" [class.disabled]="filter.page === 0">
+            <a class="page-link" (click)="changePage(filter.page - 1)"
+              ><i class="fas fa-chevron-left"></i
+            ></a>
+          </li>
+          <li class="page-item active">
+            <a class="page-link">{{ filter.page + 1 }}</a>
+          </li>
+          <li
+            class="page-item"
+            [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0"
+          >
+            <a class="page-link" (click)="changePage(filter.page + 1)"
+              ><i class="fas fa-chevron-right"></i
+            ></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  } @else {
+    <div class="card p-0 mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <input
           type="text"
           class="form-control form-control-sm"
-          placeholder="Tìm tên phòng..."
-          style="width: 200px"
-          [(ngModel)]="filter.keyword"
-          (keyup.enter)="onFilterChange()"
+          placeholder="Tìm tên hostel, địa chỉ..."
+          style="width: min(100%, 320px)"
+          [(ngModel)]="hostelKeyword"
+          [disabled]="hostelsLoading"
+          (input)="applyHostelFilter()"
         />
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline" (click)="setViewMode('rooms')">
+            <i class="fas fa-door-open"></i> Xem phòng
+          </button>
+          <button class="btn btn-primary" (click)="openHostelModal()">
+            <i class="fas fa-plus"></i> Thêm Hostel
+          </button>
+        </div>
       </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline" (click)="openHostelModal()">
-          <i class="fas fa-building"></i> Thêm Tòa Nhà
-        </button>
-        <button class="btn btn-primary" (click)="openRoomModal()">
-          <i class="fas fa-plus"></i> Thêm Phòng
-        </button>
+
+      <div class="table-responsive data-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Tên hostel</th>
+              <th>Địa chỉ</th>
+              <th>Phòng</th>
+              <th>Dịch vụ</th>
+              <th>Ảnh</th>
+              <th>Mô tả</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (hostelsLoading) {
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                  Đang tải danh sách hostel...
+                </td>
+              </tr>
+            } @else {
+              @for (hostel of hostels; track hostel.id) {
+                <tr>
+                  <td class="font-medium text-primary">{{ hostel.name || 'Chưa đặt tên' }}</td>
+                  <td>{{ getHostelAddress(hostel) }}</td>
+                  <td>{{ hostel.roomCount ?? 0 }}</td>
+                  <td>{{ hostel.serviceCount ?? 0 }}</td>
+                  <td>{{ hostel.imageCount ?? 0 }}</td>
+                  <td class="hostel-description">{{ hostel.description || 'Chưa có mô tả' }}</td>
+                  <td class="text-right">
+                    <button class="btn btn-sm btn-outline" (click)="openEditHostelModal(hostel)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline text-danger"
+                      (click)="deleteHostel(hostel.id)"
+                      style="margin-left: 0.5rem"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu tòa nhà.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+        <div class="data-shell__overlay" *ngIf="hostelsLoading">
+          <div class="loading-panel">
+            <div class="loading-panel__glow"></div>
+            <div class="loading-panel__spinner"></div>
+            <div class="loading-panel__line loading-panel__line--lg"></div>
+            <div class="loading-panel__line loading-panel__line--md"></div>
+            <div class="loading-panel__line loading-panel__line--sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+        <span class="text-sm text-muted">
+          Hiển thị trang {{ hostelFilter.page + 1 }} / {{ hostelTotalPages || 1 }} (Tổng:
+          {{ hostelTotalElements }} tòa nhà)
+        </span>
+        <ul class="pagination m-0">
+          <li class="page-item" [class.disabled]="hostelFilter.page === 0">
+            <a class="page-link" (click)="changeHostelPage(hostelFilter.page - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          <li class="page-item active">
+            <a class="page-link">{{ hostelFilter.page + 1 }}</a>
+          </li>
+          <li
+            class="page-item"
+            [class.disabled]="hostelFilter.page >= hostelTotalPages - 1 || hostelTotalPages === 0"
+          >
+            <a class="page-link" (click)="changeHostelPage(hostelFilter.page + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
-
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Cơ Sở</th>
-            <th>Tên Phòng</th>
-            <th>Loại Giường</th>
-            <th>Giá Thuê</th>
-            <th>Diện tích</th>
-            <th>Trạng Thái</th>
-            <th class="text-right">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of rooms; track r.id) {
-            <tr>
-              <td>{{ r.location || 'Chưa cập nhật' }}</td>
-              <td class="font-medium text-primary">{{ r.title }}</td>
-              <td>{{ r.bedType || 'Không có giường' }}</td>
-              <td>{{ r.price | currency: 'VND' : '' }}đ</td>
-              <td>{{ r.area }}m²</td>
-              <td>
-                <span
-                  class="badge"
-                  [ngClass]="{
-                    'badge-info': r.status === 'AVAILABLE',
-                    'badge-success': r.status === 'RENTED',
-                    'badge-danger': r.status === 'MAINTENANCE',
-                  }"
-                >
-                  {{
-                    r.status === 'AVAILABLE'
-                      ? 'Trống'
-                      : r.status === 'RENTED'
-                        ? 'Đang thuê'
-                        : 'Sửa chữa'
-                  }}
-                </span>
-              </td>
-              <td class="text-right">
-                <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-outline text-danger" style="margin-left: 0.5rem">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu phòng.</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
-      <span class="text-sm text-muted"
-        >Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }} (Tổng:
-        {{ totalElements }} phòng)</span
-      >
-      <ul class="pagination m-0">
-        <li class="page-item" [class.disabled]="filter.page === 0">
-          <a class="page-link" (click)="changePage(filter.page - 1)"
-            ><i class="fas fa-chevron-left"></i
-          ></a>
-        </li>
-        <li class="page-item active">
-          <a class="page-link">{{ filter.page + 1 }}</a>
-        </li>
-        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0">
-          <a class="page-link" (click)="changePage(filter.page + 1)"
-            ><i class="fas fa-chevron-right"></i
-          ></a>
-        </li>
-      </ul>
-    </div>
-  </div>
+  }
 </div>
 
 <div
@@ -133,7 +290,9 @@
   <div class="modal" style="max-width: 800px">
     <div class="modal-header">
       <h3 class="modal-title">Thêm Tòa Nhà / Cơ Sở Mới</h3>
-      <button class="modal-close" (click)="closeHostelModal()">&times;</button>
+      <button class="modal-close" [disabled]="isSubmittingHostel" (click)="closeHostelModal()">
+        &times;
+      </button>
     </div>
     <div class="modal-body">
       <form class="needs-validation" (ngSubmit)="onSubmitHostel()">
@@ -166,7 +325,7 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label class="form-label">Quận / Huyện</label>
             <select
               class="form-control"
@@ -176,13 +335,13 @@
               [disabled]="!newHostel.cityCode"
               required
             >
-              <option value="">-- Chon Quan/Huyen --</option>
+              <option value="">-- Chọn uận/Huyện --</option>
               @for (d of districts; track d.code) {
                 <option [value]="d.code">{{ d.name }}</option>
               }
             </select>
             <div class="form-help" *ngIf="isDistrictLoading">Dang tai Quan/Huyen...</div>
-          </div>
+          </div> -->
 
           <div class="form-group">
             <label class="form-label">Phường / Xã</label>
@@ -191,10 +350,10 @@
               name="wardCode"
               [(ngModel)]="newHostel.wardCode"
               (change)="onWardChange()"
-              [disabled]="!newHostel.districtCode"
+              [disabled]="!newHostel.cityCode"
               required
             >
-              <option value="">-- Chon Phuong/Xa --</option>
+              <option value="">-- Chọn Phường/Xã --</option>
               @for (w of wards; track w.code) {
                 <option [value]="w.code">{{ w.name }}</option>
               }
@@ -265,9 +424,18 @@
         </div>
 
         <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-outline" (click)="closeHostelModal()">Hủy</button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Lưu Cơ Sở
+          <button
+            type="button"
+            class="btn btn-outline"
+            [disabled]="isSubmittingHostel"
+            (click)="closeHostelModal()"
+          >
+            Hủy
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmittingHostel">
+            <span class="btn-loader" *ngIf="isSubmittingHostel"></span>
+            <i class="fas fa-save" *ngIf="!isSubmittingHostel"></i>
+            {{ isSubmittingHostel ? 'Dang luu...' : 'Lưu Cơ Sở' }}
           </button>
         </div>
       </form>
@@ -278,17 +446,29 @@
 <div class="modal-overlay" [class.active]="isRoomModalOpen" (click)="onRoomOverlayClick($event)">
   <div class="modal" style="max-width: 800px">
     <div class="modal-header">
-      <h3 class="modal-title">Thêm Phòng Mới</h3>
-      <button class="modal-close" (click)="closeRoomModal()">&times;</button>
+      <h3 class="modal-title">
+        {{ isEditModeRoom ? 'Cập nhật thông tin phòng' : 'Thêm Phòng Mới' }}
+      </h3>
+      <button class="modal-close" [disabled]="isSubmittingRoom" (click)="closeRoomModal()">
+        &times;
+      </button>
     </div>
     <div class="modal-body">
       <form class="needs-validation" (ngSubmit)="onSubmitRoom()">
         <div class="d-grid grid-cols-2 gap-4">
           <div class="form-group">
             <label class="form-label">Thuộc Tòa nhà / Cơ sở</label>
-            <select class="form-control" name="hostelId" [(ngModel)]="newRoom.hostelId" required>
+            <select
+              class="form-control"
+              name="hostelId"
+              [(ngModel)]="newRoom.hostelId"
+              [disabled]="hostelOptionsLoading || isSubmittingRoom || isEditModeRoom"
+              required
+            >
               <option value="">-- Chọn cơ sở --</option>
-              <option value="1">Cơ Sở Xuân Thủy</option>
+              @for (hostel of hostelOptions; track hostel.id) {
+                <option [value]="hostel.id">{{ hostel.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -306,10 +486,12 @@
           <div class="form-group">
             <label class="form-label">Giá thuê (VNĐ/tháng)</label>
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               class="form-control"
               name="basePrice"
-              [(ngModel)]="newRoom.basePrice"
+              [ngModel]="roomBasePriceDisplay"
+              (ngModelChange)="onRoomBasePriceInput($event)"
               placeholder="VD: 4500000"
               required
             />
@@ -358,7 +540,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Trang thai phong</label>
+            <label class="form-label">Trạng thái phòng</label>
             <select class="form-control" name="status" [(ngModel)]="newRoom.status">
               <option value="AVAILABLE">Phòng trống</option>
               <option value="RENTED">Đang cho thuê</option>
@@ -403,11 +585,19 @@
             }
           </div>
         </div>
-
         <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-outline" (click)="closeRoomModal()">Hủy</button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Lưu Phòng
+          <button
+            type="button"
+            class="btn btn-outline"
+            [disabled]="isSubmittingRoom"
+            (click)="closeRoomModal()"
+          >
+            Hủy
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmittingRoom">
+            <span class="btn-loader" *ngIf="isSubmittingRoom"></span>
+            <i class="fas fa-save" *ngIf="!isSubmittingRoom"></i>
+            {{ isSubmittingRoom ? 'Đang lưu...' : isEditModeRoom ? 'Cập nhật phòng' : 'Lưu Phòng' }}
           </button>
         </div>
       </form>
